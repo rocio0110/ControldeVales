@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+{% block title %}Reportes Auditoría{% endblock %}
+{% block page_title %}Centro de Reportes{% endblock %}
+
+{% block content %}
+
+<style>
+.report-container{
+    display:flex;
+    flex-direction:column;
+    gap:25px;
+}
+
+/* TARJETAS STATS */
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:20px;
+}
+
+.stat-card{
+    background:white;
+    padding:20px;
+    border-radius:18px;
+    box-shadow:0 12px 30px rgba(0,0,0,.08);
+}
+
+.stat-title{
+    font-size:13px;
+    font-weight:800;
+    color:#64748b;
+}
+
+.stat-value{
+    font-size:28px;
+    font-weight:900;
+    margin-top:8px;
+}
+
+/* CARD PRINCIPAL */
+.report-card{
+    background:white;
+    padding:30px;
+    border-radius:20px;
+    box-shadow:0 15px 40px rgba(0,0,0,.08);
+}
+
+.section-title{
+    font-size:20px;
+    font-weight:900;
+    margin-bottom:20px;
+}
+
+/* FORM */
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:20px;
+}
+
+.form-group label{
+    font-weight:800;
+    display:block;
+    margin-bottom:6px;
+}
+
+.form-control{
+    width:100%;
+    padding:12px;
+    border-radius:12px;
+    border:1px solid #d1d5db;
+    background:#f9fafb;
+    font-weight:700;
+    outline:none;
+}
+
+.form-control:focus{
+    border-color:#6a0d7b;
+    box-shadow:0 0 0 3px rgba(106,13,123,.15);
+}
+
+/* BOTONES */
+.btn-group{
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+    margin-top:25px;
+}
+
+.btn-report{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:14px;
+    border-radius:14px;
+    font-weight:900;
+    text-decoration:none;
+    color:white;
+    transition:.2s;
+}
+
+.btn-excel{ background:#16a34a; }
+.btn-excel:hover{ background:#15803d; transform:translateY(-2px); }
+
+.btn-pdf{ background:#dc2626; }
+.btn-pdf:hover{ background:#b91c1c; transform:translateY(-2px); }
+
+/* TABLA */
+.preview-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+.preview-table th,
+.preview-table td{
+    padding:10px;
+    text-align:left;
+    border-bottom:1px solid #e5e7eb;
+    font-weight:600;
+}
+
+.preview-table th{
+    background:#f1f5f9;
+    font-weight:900;
+}
+
+.preview-wrapper{
+    overflow-x:auto;
+}
+</style>
+
+<div class="report-container">
+
+    <!-- STATS -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-title">Registros Totales</div>
+            <div class="stat-value">{{ total_registros }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">Conductores Activos</div>
+            <div class="stat-value">{{ total_conductores }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-title">Comedores Evaluados</div>
+            <div class="stat-value">{{ total_comedores }}</div>
+        </div>
+    </div>
+
+    <!-- FILTROS Y DESCARGA -->
+    <div class="report-card">
+
+        <div class="section-title">
+             Generar Reporte
+        </div>
+
+        <form method="GET">
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label>Periodo</label>
+                    <select name="periodo" class="form-control">
+                        <option value="semanal" {% if periodo == "semanal" %}selected{% endif %}>Semanal</option>
+                        <option value="quincenal" {% if periodo == "quincenal" %}selected{% endif %}>Quincenal</option>
+                        <option value="mensual" {% if periodo == "mensual" %}selected{% endif %}>Mensual</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Fecha inicio</label>
+                    <input type="date" name="fecha_inicio" value="{{ fecha_inicio }}" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label>Fecha fin</label>
+                    <input type="date" name="fecha_fin" value="{{ fecha_fin }}" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label>Comedor</label>
+                    <select name="comedor" class="form-control">
+                        <option value="">Todos</option>
+                        {% for c in comedores %}
+                            <option value="{{ c.id }}" {% if comedor_id == c.id|stringformat:"s" %}selected{% endif %}>
+                                {{ c.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="btn-group">
+                <a class="btn-report btn-excel"
+                   href="{% url 'auditoria_exportar_excel' %}?periodo={{ periodo }}&fecha_inicio={{ fecha_inicio }}&fecha_fin={{ fecha_fin }}&comedor={{ comedor_id }}">
+                    Descargar Excel
+                </a>
+
+                <a class="btn-report btn-pdf"
+                   href="{% url 'auditoria_exportar_pdf' %}?periodo={{ periodo }}&fecha_inicio={{ fecha_inicio }}&fecha_fin={{ fecha_fin }}&comedor={{ comedor_id }}">
+                    Descargar PDF
+                </a>
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- VISTA PREVIA -->
+    <div class="report-card">
+
+        <div class="section-title">
+             Vista Previa de Registros
+        </div>
+
+        <div class="preview-wrapper">
+            <table class="preview-table">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Conductor</th>
+                        <th>Tipo</th>
+                        <th>Monto</th>
+                        <th>Saldo Nuevo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for m in movimientos %}
+                <tr>
+                    <td>{{ m.fecha }}</td>
+                    <td>{{ m.conductor.clave }}</td>
+                    <td>{{ m.tipo }}</td>
+                    <td>${{ m.monto }}</td>
+                    <td>${{ m.saldo_nuevo }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">No hay movimientos</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

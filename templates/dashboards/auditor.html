@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Auditor{% endblock %}
+{% block page_title %}Dashboard Auditor{% endblock %}
+
+{% block content %}
+
+<!-- ================= KPI ================= -->
+<div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:20px; margin-bottom:20px;">
+    <div class="card">
+        <div class="badge">Vales</div>
+        <p class="kpi-title">Total de Vales</p>
+        <p class="kpi-value">{{ total_vales|default:"100" }}</p>
+    </div>
+
+    <div class="card">
+        <div class="badge">Preceptores</div>
+        <p class="kpi-title">Activos</p>
+        <p class="kpi-value">{{ total_preceptores|default:"10" }}</p>
+    </div>
+
+    <div class="card">
+        <div class="badge">Conductores</div>
+        <p class="kpi-title">Con Consumo</p>
+        <p class="kpi-value">{{ total_conductores|default:"25" }}</p>
+    </div>
+
+    <div class="card">
+        <div class="badge">Zonas</div>
+        <p class="kpi-title">Operando</p>
+        <p class="kpi-value">{{ total_zonas|default:"5" }}</p>
+    </div>
+</div>
+
+<!-- ================= FILTRO ================= -->
+<div class="card" style="margin-bottom:20px; padding:15px;">
+    <form method="GET">
+        <label style="font-weight:800; margin-right:10px;">Periodo:</label>
+        <select name="periodo" onchange="this.form.submit()">
+            <option value="semanal" {% if periodo == "semanal" %}selected{% endif %}>Semanal</option>
+            <option value="quincenal" {% if periodo == "quincenal" %}selected{% endif %}>Quincenal</option>
+            <option value="mensual" {% if periodo == "mensual" %}selected{% endif %}>Mensual</option>
+        </select>
+    </form>
+</div>
+
+<!-- ================= GRAFICAS ================= -->
+<div class="section" style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
+    <div class="card chart-box" style="padding:15px;">
+        <h3 style="font-weight:900; text-align:center;">Vales por Conductor</h3>
+        <canvas id="chartConductores"></canvas>
+    </div>
+
+    <div class="card chart-box" style="padding:15px;">
+        <h3 style="font-weight:900; text-align:center;">Vales por Zona</h3>
+        <canvas id="chartZonas"></canvas>
+    </div>
+</div>
+
+<!-- ================= TABLA DETALLE ================= -->
+<div class="card" style="padding:15px;">
+    <h3 style="font-weight:900;">Detalle por Conductor</h3>
+    <table class="table-pro" style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr>
+                <th style="text-align:left; padding:8px;">Conductor</th>
+                <th style="text-align:right; padding:8px;">Total Vales</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in vales_por_conductor %}
+            <tr>
+                <td style="padding:8px;">{{ item.conductor_1__clave }}</td>
+                <td style="padding:8px; text-align:right;">{{ item.total }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="2" style="text-align:center; padding:8px;">Sin registros</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- ================= JS CHART ================= -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Datos ficticios si no hay datos reales
+const conductoresLabels = [{% for item in vales_por_conductor %}'{{ item.conductor_1__clave }}',{% empty %}'Conductor A','Conductor B','Conductor C',{% endfor %}];
+const conductoresData = [{% for item in vales_por_conductor %}{{ item.total }},{% empty %}20,35,15,{% endfor %}];
+
+const zonasLabels = [{% for item in vales_por_zona %}'{{ item.origen }}',{% empty %}'Zona 1','Zona 2','Zona 3',{% endfor %}];
+const zonasData = [{% for item in vales_por_zona %}{{ item.total }},{% empty %}50,30,20,{% endfor %}];
+
+const ctx1 = document.getElementById('chartConductores').getContext('2d');
+new Chart(ctx1, {
+    type: 'bar',
+    data: {
+        labels: conductoresLabels,
+        datasets: [{
+            label: 'Vales',
+            data: conductoresData,
+            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero:true } }
+    }
+});
+
+const ctx2 = document.getElementById('chartZonas').getContext('2d');
+new Chart(ctx2, {
+    type: 'doughnut',
+    data: {
+        labels: zonasLabels,
+        datasets: [{
+            data: zonasData,
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.7)',
+                'rgba(255, 206, 86, 0.7)',
+                'rgba(75, 192, 192, 0.7)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: { responsive: true }
+});
+</script>
+
+{% endblock %}

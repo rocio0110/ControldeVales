@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Detalle Conductor{% endblock %}
+
+{% block content %}
+
+<div class="card" style="padding:18px;">
+
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+        <div>
+            <h2 style="margin:0; font-weight:900;">Detalle del Conductor</h2>
+            <p style="margin:6px 0 0 0; color:var(--muted); font-weight:700;">
+                Información completa del conductor.
+            </p>
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <a href="{% url 'conductor_editar' conductor.id %}" class="btn btn-purple">Editar</a>
+            <a href="{% url 'conductores_list' %}" class="btn btn-blue">Volver</a>
+        </div>
+    </div>
+
+    <hr style="margin:16px 0; border:0; border-top:1px solid #e2e8f0;">
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+        <div class="mini-card">
+            <div style="font-weight:900;">Clave</div>
+            <div style="margin-top:6px; font-weight:800;">{{ conductor.clave }}</div>
+        </div>
+
+        <div class="mini-card">
+            <div style="font-weight:900;">Marca</div>
+            <div style="margin-top:6px; font-weight:800;">{{ conductor.marca }}</div>
+        </div>
+
+        <div class="mini-card">
+            <div style="font-weight:900;">Nombre</div>
+            <div style="margin-top:6px; font-weight:800;">
+                {{ conductor.nombre }} {{ conductor.apellido_paterno }} {{ conductor.apellido_materno }}
+            </div>
+        </div>
+
+        <div class="mini-card">
+            <div style="font-weight:900;">Username</div>
+            <div style="margin-top:6px; font-weight:800;">
+                {{ conductor.user.username }}
+            </div>
+        </div>
+
+        <div class="mini-card">
+            <div style="font-weight:900;">Saldo</div>
+            <div style="margin-top:6px; font-weight:900; font-size:20px;">
+                ${{ conductor.saldo }}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

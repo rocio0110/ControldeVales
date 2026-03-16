@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Area de Servicios{% endblock %}
+{% block page_title %}Mi Panel{% endblock %}
+
+{% block content %}
+
+<div class="grid">
+    <div class="card">
+        <div class="badge">Clave</div>
+        <p class="kpi-title">Tu clave</p>
+        <p class="kpi-value">{{ conductor.clave }}</p>
+    </div>
+
+    <div class="card">
+        <div class="badge">Saldo</div>
+        <p class="kpi-title">Saldo actual</p>
+        <p class="kpi-value">{{ conductor.saldo }}</p>
+    </div>
+
+    <div class="card">
+        <div class="badge">Marca</div>
+        <p class="kpi-title">Marca asignada</p>
+        <p class="kpi-value">{{ conductor.marca }}</p>
+    </div>
+</div>
+
+<div class="section">
+    <div class="card">
+        <h3 style="margin:0; font-weight:900;">
+            Bienvenido {{ conductor.nombre }} {{ conductor.apellido_paterno }}
+        </h3>
+        <p style="margin:10px 0 0 0; color:var(--muted); font-weight:800;">
+            Aquí puedes consultar los datos de cada vale de Alimento.
+        </p>
+
+        <div style="margin-top:18px;">
+            <a class="btn btn-purple" href="{% url 'conductor_qr' %}">Ver mi QR</a>
+        </div>
+    </div>
+
+    <div class="mini-card">
+        <h3 style="margin-top:0; font-weight:900;">Datos</h3>
+
+        <p style="margin:0; font-weight:900;">Nombre:</p>
+        <p style="margin-top:4px; color:var(--muted); font-weight:800;">
+            {{ conductor.nombre }} {{ conductor.apellido_paterno }} {{ conductor.apellido_materno }}
+        </p>
+
+        <p style="margin:14px 0 0 0; font-weight:900;">Marca:</p>
+        <p style="margin-top:4px; color:var(--muted); font-weight:800;">
+            {{ conductor.marca }}
+        </p>
+    </div>
+</div>
+
+{% endblock %}

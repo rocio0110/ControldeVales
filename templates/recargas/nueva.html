@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block title %}Rutas Programadas{% endblock %}
+{% if messages %}
+    {% for message in messages %}
+        <div style="
+            margin-top:12px;
+            padding:12px;
+            border-radius:10px;
+            font-weight:800;
+            background:
+                {% if message.tags == 'success' %}
+                    #dcfce7;
+                {% elif message.tags == 'error' %}
+                    #fee2e2;
+                {% else %}
+                    #e2e8f0;
+                {% endif %}
+        ">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+{% block content %}
+
+<div class="card" style="padding:18px;">
+
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+        <div>
+            <h2 style="margin:0; font-weight:900;">Rutas Programadas</h2>
+            <p style="margin:6px 0 0 0; color: var(--muted); font-weight:700;">
+                Gestión de rutas y asignación de conductores.
+            </p>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- NUEVA RUTA -->
+<div class="card" style="padding:18px; margin-top:16px;">
+    <h3 style="font-weight:900;">Agregar nueva ruta</h3>
+
+    <form method="post" style="margin-top:14px;">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit" name="submit_form"
+                class="btn"
+                style="background:#0f3a56; color:white; padding:10px 16px;">
+            Guardar Ruta
+        </button>
+    </form>
+</div>
+
+
+<!-- IMPORTAR EXCEL -->
+<div class="card" style="padding:18px; margin-top:16px;">
+    <h3 style="font-weight:900;">Importar rutas desde Excel</h3>
+
+    <form method="post" enctype="multipart/form-data" style="margin-top:14px;">
+        {% csrf_token %}
+
+        <input type="file" name="excel_file" required
+               style="padding:10px; border:1px solid #e2e8f0; border-radius:10px; width:100%; max-width:400px;">
+
+        <div style="margin-top:12px;">
+            <button type="submit" name="submit_excel"
+                    class="btn"
+                    style="background:#16a34a; color:white; padding:10px 16px;">
+                Importar
+            </button>
+        </div>
+    </form>
+</div>
+
+<div style="margin-bottom:16px; padding:12px; background:#f8fafc; border-radius:10px;">
+    <form method="get" style="display:flex; gap:12px; flex-wrap:wrap; align-items:end;">
+
+        <div>
+            <label style="font-weight:800;">Desde</label>
+            <input type="time" 
+       name="hora_inicio"
+       value="{{ request.GET.hora_inicio }}"
+       step="60"
+       required
+       style="padding:6px 10px; border-radius:6px;">
+        </div>
+
+        <div>
+            <label style="font-weight:800;">Hasta</label>
+            <input type="time" 
+       name="hora_fin"
+       value="{{ request.GET.hora_fin }}"
+       step="60"
+       required
+       style="padding:6px 10px; border-radius:6px;">
+        </div>
+
+        <button type="submit"
+                style="background:#0f3a56; color:white; padding:8px 14px; border:none; border-radius:8px;">
+            Filtrar
+        </button>
+
+        <a href="{% url 'recarga_nueva' %}"
+           style="background:#6b7280; color:white; padding:8px 14px; border-radius:8px; text-decoration:none;">
+            Limpiar
+        </a>
+
+    </form>
+</div>
+<!-- LISTA DE RUTAS -->
+<div class="card" style="padding:18px; margin-top:16px;">
+
+    <h3 style="font-weight:900;">Rutas existentes</h3>
+
+    {% if rutas_existentes %}
+    <div style="overflow:auto; margin-top:14px;">
+        <table style="width:100%; border-collapse: collapse; min-width:900px;">
+            <thead>
+                <tr style="background:#0f3a56; color:white;">
+                    <th style="padding:14px;">ID</th>
+                    <th style="padding:14px;">Hora</th>
+                    <th style="padding:14px;">Origen</th>
+                    <th style="padding:14px;">Destino</th>
+                    <th style="padding:14px;">Días</th>
+                    <th style="padding:14px;">Lugar Vales</th>            
+                    
+                </tr>
+            </thead>
+            <tbody>
+                {% for ruta in rutas_existentes %}
+                <tr style="border-bottom:1px solid #e2e8f0;">
+                    <td style="padding:14px; font-weight:800;">{{ ruta.id }}</td>
+                    <td style="padding:14px; font-weight:800;">{{ ruta.hora_salida|time:"H:i" }}</td>
+                    <td style="padding:14px; font-weight:800;">{{ ruta.origen }}</td>
+                    <td style="padding:14px;">{{ ruta.destino }}</td>
+                    <td style="padding:14px;">{{ ruta.dias_formateados }}</td>
+                    <td>
+                        {% for lugar, cantidad in ruta.get_lugares_vales %}
+                            <div style="background:#f1f5f9; padding:6px 10px; 
+                                        border-radius:8px; margin-bottom:4px;
+                                        font-weight:700;">
+                                {{ lugar }} → {{ cantidad }}
+                            </div>
+                        {% empty %}
+                            -
+                        {% endfor %}
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <p style="margin-top:12px; color:var(--muted); font-weight:800;">
+            No hay rutas registradas.
+        </p>
+    {% endif %}
+</div>
+
+
+<!-- ASIGNAR CONDUCTORES -->
+{% if rutas_existentes %}
+<div class="card" style="padding:18px; margin-top:16px;">
+
+    <h3 style="font-weight:900;">Asignar conductores</h3>
+
+    <form method="post" style="margin-top:14px;">
+        {% csrf_token %}
+
+        <div style="margin-bottom:12px;">
+            <label style="font-weight:800;">Seleccione una ruta</label>
+            <select name="ruta_id"
+                    style="width:100%; max-width:400px; padding:10px; border:1px solid #e2e8f0; border-radius:10px;">
+                {% for ruta in rutas_existentes %}
+                    <option value="{{ ruta.id }}">
+                       {{ ruta.hora_salida }} {{ ruta.origen }} → {{ ruta.destino }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        {{ asignacion_form.as_p }}
+
+        <button type="submit" name="submit_asignacion"
+                class="btn"
+                style="background:#6a0d7b; color:white; padding:10px 16px;">
+            Asignar Conductores
+        </button>
+    </form>
+
+</div>
+{% endif %}
+
+{% endblock %}

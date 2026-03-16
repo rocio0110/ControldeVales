@@ -1,0 +1,252 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Operaciones ADO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        :root{
+            --ado-purple: #4C0058;
+            --ado-purple-dark: #4C0058;
+            --ado-red: #E11D48;
+            --bg: #f3f4f6;
+            --text: #111827;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+        }
+
+        *{
+            box-sizing: border-box;
+        }
+
+        body{
+            margin:0;
+            font-family: Arial, sans-serif;
+            background: var(--bg);
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            padding: 20px;
+        }
+
+        /* CARD PRINCIPAL */
+        .login-card{
+            width: 980px;
+            max-width: 100%;
+            height: 520px;
+            background: white;
+            border-radius: 18px;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            box-shadow: 0px 12px 30px rgba(0,0,0,0.18);
+        }
+
+        /* PANEL IZQUIERDO */
+        .login-left{
+            background: var(--ado-purple);
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            padding: 40px;
+        }
+
+        .login-left img{
+            width: 90%;
+            max-width: 360px;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0px 8px 20px rgba(0,0,0,0.25));
+        }
+
+        /* PANEL DERECHO */
+        .login-right{
+            padding: 60px 60px;
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+        }
+
+        .hello{
+            font-size: 28px;
+            margin: 0;
+            color: var(--text);
+        }
+
+        .welcome{
+            margin-top: 4px;
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--ado-purple);
+        }
+
+        .subtitle{
+            margin-top: 25px;
+            margin-bottom: 30px;
+            color: var(--ado-purple);
+            font-size: 18px;
+        }
+
+        /* INPUTS */
+        .form-group{
+            margin-bottom: 18px;
+        }
+
+        input{
+            width: 100%;
+            padding: 14px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            outline: none;
+            font-size: 16px;
+        }
+
+        input:focus{
+            border-color: var(--ado-purple);
+            box-shadow: 0px 0px 0px 3px rgba(106,0,122,0.12);
+        }
+
+        /* LINK */
+        .forgot{
+            text-align: right;
+            margin-top: -5px;
+            margin-bottom: 22px;
+        }
+
+        .forgot a{
+            font-size: 13px;
+            color: var(--muted);
+            text-decoration: none;
+        }
+
+        .forgot a:hover{
+            color: var(--ado-purple);
+            text-decoration: underline;
+        }
+
+        /* BOTÓN */
+        button{
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: var(--ado-purple);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover{
+            background: var(--ado-purple-dark);
+            transform: translateY(-1px);
+        }
+
+        /* MENSAJES DJANGO */
+        .msg{
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .msg-error{
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .msg-success{
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        /* RESPONSIVE */
+        @media(max-width: 900px){
+            .login-card{
+                height: auto;
+                grid-template-columns: 1fr;
+            }
+
+            .login-left{
+                padding: 30px;
+            }
+
+            .login-right{
+                padding: 35px 25px;
+            }
+
+            .hello, .welcome{
+                text-align: center;
+            }
+
+            .subtitle{
+                text-align: center;
+            }
+
+            .forgot{
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="login-card">
+
+    <!-- IZQUIERDA (MORADO + LOGO) -->
+    <div class="login-left">
+        <!--  RUTA  LOGO -->
+        <img src="{% static 'img/logo3.png' %}" alt="ADO">
+
+    </div>
+
+    <!-- DERECHA (FORMULARIO) -->
+    <div class="login-right">
+
+        <h2 class="hello">Hola !</h2>
+        <div class="welcome">Bienvenido</div>
+
+        <div class="subtitle">Inicia Sesión con tu cuenta</div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="msg {% if message.tags == 'error' %}msg-error{% else %}msg-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <input type="text" name="username" placeholder="Usuario" required>
+            </div>
+
+            <div class="form-group">
+                <input type="password" name="password" placeholder="Contraseña" required>
+            </div>
+
+            <div class="forgot">
+                <a href="/recuperar-cuenta/">He olvidado mi contraseña</a>
+            </div>
+
+            <button type="submit">INICIAR SESION</button>
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>

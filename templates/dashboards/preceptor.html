@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Preceptor{% endblock %}
+{% block page_title %}Dashboard Preceptor{% endblock %}
+
+{% block content %}
+
+<div class="grid">
+    
+    <div class="card">
+        <div class="badge">Recargas</div>
+        <p class="kpi-title">Recargas del mes</p>
+        <p class="kpi-value">{{ total_recargas|default:"0" }}</p>
+    </div>
+
+    <div class="card">
+        <div class="badge">Validaciones</div>
+        <p class="kpi-title">Validaciones QR</p>
+        <p class="kpi-value">{{ total_validaciones|default:"0" }}</p>
+    </div>
+
+    <div class="card">
+        <div class="badge">Conductores</div>
+        <p class="kpi-title">Conductores activos</p>
+        <p class="kpi-value">{{ total_conductores|default:"0" }}</p>
+    </div>
+</div>
+
+<div class="section">
+    <div class="card chart-box">
+        <h3 style="margin:0; font-weight:900;">Movimientos</h3>
+        <p style="margin:6px 0 18px 0; color:var(--muted); font-weight:800;">
+            Resumen semanal
+        </p>
+
+        <canvas id="chartSupervisor"></canvas>
+    </div>
+
+    <div class="mini-card">
+        <h3 style="margin-top:0; font-weight:900;">Acciones</h3>
+
+        <div style="display:flex; flex-direction:column; gap:12px; margin-top:14px;">
+            <!-- Ahora apunta a la vista de historial adaptada -->
+            <a class="btn btn-purple" href="{% url 'recargas_historial' %}">Historial recargas</a>
+
+            <!-- Nuevo conductor -->
+            <a class="btn btn-blue" href="{% url 'conductores_nuevo' %}">Nuevo conductor</a>
+
+            <!-- Nueva recarga (formulario + Excel) -->
+            <a class="btn btn-yellow" href="{% url 'recarga_nueva' %}">Nueva recarga</a>
+
+            <!-- Validación QR -->
+            <a class="btn btn-black" href="{% url 'validacion_qr' %}">Validar QR</a>
+        </div>
+    </div>
+</div>
+
+<script>
+const ctx2 = document.getElementById('chartSupervisor');
+
+new Chart(ctx2, {
+    type: 'bar',
+    data: {
+        labels: ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'],
+        datasets: [{
+            label: 'Actividad',
+            data: [3, 7, 4, 9, 6, 2, 5],
+            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero:true
+            }
+        }
+    }
+});
+</script>
+
+{% endblock %}

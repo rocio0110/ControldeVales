@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Editar Corrida{% endblock %}
+
+{% block content %}
+
+<div class="card" style="padding:18px;">
+    <h2 style="margin:0; font-weight:900;">Editar Corrida</h2>
+    <p style="margin-top:6px; color:var(--muted); font-weight:700;">
+        Modifica el conductor asignado y agrega un segundo conductor si aplica.
+    </p>
+</div>
+
+<div class="card" style="padding:18px; margin-top:16px;">
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label style="font-weight:900;">Conductor 1</label>
+        <select name="conductor_1_id" required>
+            {% for c in conductores %}
+                <option value="{{ c.id }}" {% if recarga.conductor_1_id == c.id %}selected{% endif %}>
+                    {{ c.clave }} - {{ c.nombre }} {{ c.apellido_paterno }} {{ c.apellido_materno }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label style="margin-top:10px; font-weight:900;">Conductor 2 (Opcional)</label>
+        <select name="conductor_2_id">
+            <option value="">-- Sin segundo conductor --</option>
+            {% for c in conductores %}
+                <option value="{{ c.id }}" {% if recarga.conductor_2_id == c.id %}selected{% endif %}>
+                    {{ c.clave }} - {{ c.nombre }} {{ c.apellido_paterno }} {{ c.apellido_materno }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button class="btn btn-purple" style="margin-top:14px;">
+            Guardar cambios
+        </button>
+
+        <a href="{% url 'recargas_historial' %}" class="btn btn-blue" style="margin-top:14px;">
+            Cancelar
+        </a>
+    </form>
+
+</div>
+
+{% endblock %}

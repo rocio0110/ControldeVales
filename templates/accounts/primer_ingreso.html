@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Primer ingreso{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h2 class="page-title">Primer ingreso</h2>
+        <p class="page-subtitle">
+            Por seguridad debes cambiar tu contraseña y aceptar los términos.
+        </p>
+    </div>
+</div>
+
+<div style="display:flex; justify-content:center; margin-top:20px;">
+    <div class="card" style="max-width:520px; width:100%; padding:24px;">
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- Passwords -->
+            <div class="grid" style="gap:18px;">
+                <div>
+                    <label style="font-weight:900;">Nueva contraseña</label>
+                    <input type="password"
+                           name="password1"
+                           required
+                           style="width:100%; padding:10px; border-radius:12px; border:1px solid #e5e7eb;">
+                </div>
+
+                <div>
+                    <label style="font-weight:900;">Confirmar contraseña</label>
+                    <input type="password"
+                           name="password2"
+                           required
+                           style="width:100%; padding:10px; border-radius:12px; border:1px solid #e5e7eb;">
+                </div>
+            </div>
+
+            <!-- Checkbox -->
+            <div style="
+                margin-top:20px;
+                background:#f8fafc;
+                padding:14px;
+                border-radius:14px;
+                border:1px solid #e2e8f0;
+                display:flex;
+                align-items:center;
+                gap:10px;
+            ">
+                <input type="checkbox"
+                       name="acepto_tyc"
+                       value="1"
+                       required
+                       style="width:18px; height:18px;">
+
+                <span style="font-weight:800; color:var(--muted);">
+                    Acepto los Términos y Condiciones
+                </span>
+            </div>
+
+            <!-- Botón -->
+            <div style="margin-top:22px; text-align:center;">
+                <button class="btn btn-purple" style="padding:10px 26px;">
+                    Guardar cambios
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

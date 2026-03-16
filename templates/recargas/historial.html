@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}Historial de Rutas{% endblock %}
+
+{% block content %}
+
+<div class="card" style="padding:18px;">
+
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+        <div>
+            <h2 style="margin:0; font-weight:900;">Historial de Rutas Programadas</h2>
+            <p style="margin:6px 0 0 0; color: var(--muted); font-weight:700;">
+                Consulta y gestión de rutas registradas.
+            </p>
+        </div>
+
+        <a href="{% url 'recarga_nueva' %}"
+           class="btn"
+           style="background:#16a34a; color:white; padding:10px 16px;">
+            + Nueva Ruta
+        </a>
+    </div>
+
+</div>
+
+
+<div class="card" style="padding:18px; margin-top:16px;">
+
+    {% if rutas %}
+    <div style="overflow:auto;">
+        <form method="GET" style="margin-bottom:16px;">
+            <input type="date" name="fecha" value="{{ fecha }}">
+            <button class="btn btn-blue">Filtrar</button>
+        </form>
+        <table style="width:100%; border-collapse:collapse; min-width:1100px;">
+            <thead>
+                <tr style="background:#0f3a56; color:white;">
+                    <th style="padding:14px;">ID</th>
+                    <th style="padding:14px;">Origen</th>
+                    <th style="padding:14px;">Destino</th>
+                    <th style="padding:14px;">Hora</th>
+                    <th style="padding:14px;">Días</th>
+                    <th style="padding:14px;">Conductores</th>
+                    <th style="padding:14px;">Activa</th>
+                    <th style="padding:14px;">Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for ruta in rutas %}
+                <tr style="border-bottom:1px solid #e2e8f0;">
+
+                    <td style="padding:14px; font-weight:900;">
+                        {{ ruta.id }}
+                    </td>
+
+                    <td style="padding:14px; font-weight:800;">
+                        {{ ruta.origen }}
+                    </td>
+
+                    <td style="padding:14px; font-weight:800;">
+                        {{ ruta.destino }}
+                    </td>
+
+                    <td style="padding:14px;">
+                        {{ ruta.hora_salida|time:"h:i a" }}
+                    </td>
+
+                    <!-- DÍAS -->
+                    <td style="padding:14px;">
+                        {% for dia in ruta.dias %}
+                            {% if dia == "L" %}<span style="padding:6px 10px; border-radius:999px; background:rgba(15,58,86,0.12); font-weight:800;">Lunes</span>{% endif %}
+                            {% if dia == "M" %}<span style="padding:6px 10px; border-radius:999px; background:rgba(15,58,86,0.12); font-weight:800;">Martes</span>{% endif %}
+                            {% if dia == "W" %}<span style="padding:6px 10px; border-radius:999px; background:rgba(15,58,86,0.12); font-weight:800;">Miércoles</span>{% endif %}
+                            {% if dia == "J" %}<span style="padding:6px 10px; border-radius:999px; background:rgba(15,58,86,0.12); font-weight:800;">Jueves</span>{% endif %}
+                            {% if dia == "V" %}<span style="padding:6px 10px; border-radius:999px; background:rgba(15,58,86,0.12); font-weight:800;">Viernes</span>{% endif %}
+                            {% if dia == "S" %}<span style="padding:6px 10px; border-radius:999px; background:rgba(15,58,86,0.12); font-weight:800;">Sábado</span>{% endif %}
+                            {% if dia == "D" %}<span style="padding:6px 10px; border-radius:999px; background:rgba(15,58,86,0.12); font-weight:800;">Domingo</span>{% endif %}
+                        {% endfor %}
+                    </td>
+
+                    <!-- CONDUCTORES -->
+                    <td style="padding:14px;">
+
+                        {% for asignacion in ruta.asignaciones.all %}
+
+                            <!-- Conductor 1 -->
+                            <span style="padding:6px 10px; border-radius:999px; background:#0f3a56; color:white; font-weight:800;">
+                                {{ asignacion.conductor_1.clave }} -
+                                {{ asignacion.conductor_1.nombre }}
+                                {{ asignacion.conductor_1.apellido_paterno }}
+                                {{ asignacion.conductor_1.apellido_materno }}
+                            </span>
+
+                            <!-- Conductor 2 si existe -->
+                            {% if asignacion.conductor_2 %}
+                                <span style="padding:6px 10px; border-radius:999px; background:#6a0d7b; color:white; font-weight:800;">
+                                    {{ asignacion.conductor_2.clave }} -
+                                    {{ asignacion.conductor_2.nombre }}
+                                    {{ asignacion.conductor_2.apellido_paterno }}
+                                    {{ asignacion.conductor_2.apellido_materno }}
+                                </span>
+                            {% endif %}
+
+                        {% empty %}
+                            <span style="color:var(--muted); font-weight:800;">
+                                Sin conductores
+                            </span>
+                        {% endfor %}
+
+                    </td>
+
+                    <!-- ACTIVA -->
+                    <td style="padding:14px; font-weight:900;">
+                        {% if ruta.activa %}
+                            <span style="color:#16a34a;">Sí</span>
+                        {% else %}
+                            <span style="color:#dc2626;">No</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- ACCIONES -->
+                    <td style="padding:14px;">
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+
+                            {% for asignacion in ruta.asignaciones.all %}
+                                <a href="{% url 'recarga_editar' asignacion.id %}"
+                                class="btn"
+                                style="background:#6a0d7b; color:white; padding:8px 12px;">
+                                    Editar
+                                </a>
+                            {% endfor %}
+
+                            <a href="{% url 'recarga_eliminar' ruta.id %}"
+                            class="btn"
+                            style="background:#dc2626; color:white; padding:8px 12px;"
+                            onclick="return confirm('¿Seguro que quieres eliminar esta ruta?');">
+                                Eliminar
+                            </a>
+
+                        </div>
+                    </td>
+
+                </tr>
+
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="padding:18px; text-align:center; color:var(--muted); font-weight:800;">
+                        No hay rutas registradas.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+        <p style="color:var(--muted); font-weight:800;">
+            No hay rutas registradas.
+        </p>
+    {% endif %}
+
+</div>
+
+{% endblock %}

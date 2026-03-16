@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Admin{% endblock %}
+{% block page_title %}Dashboard Administrador{% endblock %}
+
+{% block content %}
+
+<div class="grid">
+    <div class="card">
+        <div class="badge">Conductores</div>
+        <p class="kpi-title">Total conductores</p>
+        <p class="kpi-value">{{ total_conductores|default:"0" }}</p>
+    </div>
+
+    <div class="card">
+        <div class="badge">Recargas</div>
+        <p class="kpi-title">Total recargas</p>
+        <p class="kpi-value">{{ total_recargas|default:"0" }}</p>
+    </div>
+
+    <div class="card">
+        <div class="badge">Consumos</div>
+        <p class="kpi-title">Total consumos</p>
+        <p class="kpi-value">{{ total_consumos|default:"0" }}</p>
+    </div>
+</div>
+
+<div class="section">
+
+    <div class="card chart-box">
+        <h3 style="margin:0; font-weight:900;">Resumen semanal</h3>
+        <p style="margin:6px 0 18px 0; color:var(--muted); font-weight:800;">
+            Actividad general del sistema
+        </p>
+
+        <canvas id="chartAdmin"></canvas>
+    </div>
+
+    <div class="mini-card">
+        <h3 style="margin-top:0; font-weight:900;">Acciones rápidas</h3>
+
+        <div style="display:flex; flex-direction:column; gap:12px; margin-top:14px;">
+            <a class="btn btn-purple" href="{% url 'usuarios_nuevo' %}">Nuevo usuario</a>
+            <a class="btn btn-blue" href="{% url 'conductores_nuevo' %}">Nuevo conductor</a>
+            <a class="btn btn-yellow" href="/recargas/nueva/">Nueva recarga</a>
+            
+        </div>
+    </div>
+
+</div>
+
+<script>
+const ctx = document.getElementById('chartAdmin');
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'],
+        datasets: [{
+            label: 'Movimientos',
+            data: [12, 19, 10, 22, 16, 9, 14],
+            tension: 0.35,
+            fill: false
+        }]
+    }
+});
+</script>
+
+{% endblock %}

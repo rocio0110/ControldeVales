@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Mi QR{% endblock %}
+
+{% block content %}
+<h2>Mi QR</h2>
+<p>Este QR será validado en comedor.</p>
+
+<div style="display:flex; justify-content:center; margin-top:20px;">
+    <div class="card red" style="max-width:420px; text-align:center;">
+        <h3 style="margin:0;">{{ request.user.username }}</h3>
+        <p style="margin-top:6px; color:#6b7280;">
+            Clave: {{ request.user.conductor_profile.clave }}
+        </p>
+
+        <div style="margin-top:18px;">
+            <img src="{% url 'conductor_qr_png' %}"
+     style="width:260px; border-radius:12px; border:2px solid #B0193E;">
+
+        </div>
+
+        <p style="margin-top:18px;">
+            <b>Saldo:</b> {{ request.user.conductor_profile.saldo }}
+        </p>
+    </div>
+</div>
+{% endblock %}

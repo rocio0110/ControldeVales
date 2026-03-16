@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+{% block title %}Comedor - Validación QR{% endblock %}
+
+{% block content %}
+
+<!-- HEADER -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Validación QR (Comedor)</h1>
+        <p class="page-subtitle">
+            Escanea el QR del conductor y valida el servicio.
+        </p>
+    </div>
+</div>
+
+<!-- RESULTADO -->
+{% if resultado %}
+<div class="card" style="margin-bottom:16px;">
+    <div class="card-header"
+        style="
+        {% if resultado == 'aprobado' %}
+            background:#dcfce7; border-bottom:1px solid #bbf7d0;
+        {% elif resultado == 'denegado' %}
+            background:#fee2e2; border-bottom:1px solid #fecaca;
+        {% else %}
+            background:#fef9c3; border-bottom:1px solid #fde68a;
+        {% endif %}
+        "
+    >
+        <h3 style="margin:0;">Resultado de Validación</h3>
+
+        <span class="badge"
+            style="
+            {% if resultado == 'aprobado' %}
+                background:#16a34a; color:white;
+            {% elif resultado == 'denegado' %}
+                background:#dc2626; color:white;
+            {% else %}
+                background:#f59e0b; color:white;
+            {% endif %}
+            "
+        >
+            {% if resultado == "aprobado" %}
+                APROBADO
+            {% elif resultado == "denegado" %}
+                DENEGADO
+            {% elif resultado == "qr_invalido" %}
+                QR INVÁLIDO
+            {% elif resultado == "servicio_invalido" %}
+                SERVICIO INVÁLIDO
+            {% endif %}
+        </span>
+    </div>
+
+    <div style="padding:18px;">
+
+        {% if conductor %}
+        <div class="mini-card" style="padding:14px; margin-bottom:12px;">
+            <p style="margin:0; font-weight:900;">Conductor</p>
+            <p style="margin-top:6px; font-weight:800;">
+                {{ conductor.clave }} -
+                {{ conductor.nombre }}
+                {{ conductor.apellido_paterno }}
+                {{ conductor.apellido_materno }}
+            </p>
+        </div>
+        {% endif %}
+
+        {% if ultimo_consumo %}
+        <div class="mini-card" style="padding:14px;">
+            <p style="margin:0; font-weight:900;">Último consumo registrado</p>
+            <p style="margin-top:6px; font-weight:800;">
+                {{ ultimo_consumo.fecha|date:"d/m/Y H:i" }} |
+                {{ ultimo_consumo.lugar }}
+            </p>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endif %}
+
+<!-- CAMARA -->
+<div class="card">
+    <div class="card-header">
+        <h3 style="margin:0;">Escaneo con Cámara</h3>
+    </div>
+
+    <div style="padding:18px;">
+        <div id="reader" style="width:100%; max-width:520px;"></div>
+
+        <p style="margin-top:12px; font-weight:800;">
+            Apunta la cámara al QR. Se enviará automáticamente.
+        </p>
+    </div>
+</div>
+
+<!-- VALES DISPONIBLES -->
+{% if conductor and ruta %}
+<div class="card" style="margin-top:16px;">
+    <div class="card-header">
+        <h3 style="margin:0;">Vales Asignados por Ruta</h3>
+    </div>
+
+    <div style="padding:18px;">
+        <p><strong>Ruta:</strong> {{ ruta.origen }} → {{ ruta.destino }}</p>
+
+        {% for v in vales_disponibles %}
+            <div class="mini-card" style="margin-top:10px; padding:12px;">
+                <p><strong>{{ v.lugar }}</strong></p>
+                <p>Asignados: {{ v.asignados }}</p>
+                <p>Consumidos hoy: {{ v.consumidos }}</p>
+                <p style="font-weight:900; color:{% if v.restantes > 0 %}green{% else %}red{% endif %};">
+                    Restantes: {{ v.restantes }}
+                </p>
+            </div>
+        {% empty %}
+            <p>No hay vales configurados para esta ruta.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- FORM -->
+<div class="card" style="margin-top:16px;">
+    <div class="card-header">
+        <h3 style="margin:0;">Servicio</h3>
+    </div>
+
+    <div style="padding:18px;">
+        <form method="POST" id="scanForm">
+            {% csrf_token %}
+
+            <input type="hidden" name="qr_data" id="qrInput">
+
+            <label style="font-weight:900;">Clave del conductor</label>
+            <input type="text" name="clave_manual"
+                   placeholder="Escribe la clave"
+                   style="width:100%; padding:8px; margin-bottom:12px;">
+
+            <label style="font-weight:900;">Servicio</label>
+            <select name="servicio_id" required style="width:100%; padding:8px;">
+                <option value="">Seleccionar...</option>
+
+                {% for v in vales_disponibles %}
+                    <option value="{{ v.lugar }}">
+                        {{ v.lugar }} (Restantes: {{ v.restantes }})
+                    </option>
+                {% endfor %}
+            </select>
+
+            <button class="btn btn-purple" style="margin-top:14px;">
+                Validar
+            </button>
+        </form>
+    </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+
+    const qrInput = document.getElementById("qrInput");
+    const form = document.getElementById("scanForm");
+
+    let bloqueado = false;
+
+    function beep(freq, duration){
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.frequency.value = freq;
+        osc.type = "sine";
+        gain.gain.setValueAtTime(0.18, ctx.currentTime);
+
+        osc.start();
+        setTimeout(() => {
+            osc.stop();
+            ctx.close();
+        }, duration);
+    }
+
+    {% if resultado == "aprobado" %}
+        beep(900, 140);
+    {% elif resultado == "denegado" %}
+        beep(250, 380);
+    {% elif resultado %}
+        beep(450, 200);
+    {% endif %}
+
+    {% if resultado %}
+        setTimeout(() => {
+            window.location.href = "{% url 'validacion_qr' %}";
+        }, 2500);
+    {% endif %}
+
+    function onScanSuccess(decodedText) {
+        if(bloqueado) return;
+        bloqueado = true;
+        qrInput.value = decodedText;
+        beep(700, 120);
+        setTimeout(() => { form.submit(); }, 150);
+    }
+
+    function onScanFailure(error) {}
+
+    const html5QrCode = new Html5Qrcode("reader");
+
+    Html5Qrcode.getCameras().then(cameras => {
+        if(cameras && cameras.length){
+            html5QrCode.start(
+                cameras[0].id,
+                { fps: 10, qrbox: 260 },
+                onScanSuccess,
+                onScanFailure
+            );
+        }
+    }).catch(err => {
+        console.log("Error cámara:", err);
+    });
+
+});
+</script>
+
+{% endblock %}

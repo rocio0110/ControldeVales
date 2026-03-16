@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Perfil Conductor{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-header bg-gradient text-white rounded-top-4"
+             style="background: linear-gradient(90deg, #6f42c1, #4e73df);">
+            <h4 class="mb-0">Perfil del Conductor</h4>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p><strong>ID:</strong><br>{{ conductor.id }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Nombre:</strong><br>{{ conductor.user.get_full_name }}</p>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p><strong>Número de Empleado:</strong><br>{{ conductor.numero_empleado }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p>
+                        <strong>Mis vales:</strong><br>
+                        <span class="badge bg-success fs-6">
+                            ${{ conductor.saldo }}
+                        </span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <p>
+                    <strong>Estado:</strong><br>
+                    {% if conductor.activo %}
+                        <span class="badge bg-success">Activo</span>
+                    {% else %}
+                        <span class="badge bg-danger">Inactivo</span>
+                    {% endif %}
+                </p>
+            </div>
+
+            <hr>
+
+
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,710 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+
+    <!-- SOLO 1 block title -->
+    <title>{% block title %}Sistema{% endblock %}</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root{
+            --bg: #eef2f7;
+            --card: #ffffff;
+            --text: #0f172a;
+            --muted: #64748b;
+
+            --sidebar: #0b2a3f;
+            --sidebar2: #0f3a56;
+
+            --accent: #6a0d7b;
+            --accent2: #8b1aa3;
+
+            --radius: 18px;
+            --shadow: 0 12px 30px rgba(0,0,0,0.10);
+        }
+
+        *{ box-sizing:border-box; }
+
+        body{
+            margin:0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .layout{
+            display:flex;
+            min-height:100vh;
+        }
+
+        /* Sidebar */
+        .sidebar{
+            width: 270px;
+            background: linear-gradient(180deg, var(--sidebar), var(--sidebar2));
+            color: white;
+            padding: 18px 14px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            transition: width 0.25s ease;
+            overflow:hidden;
+        }
+
+        .sidebar.collapsed{
+            width: 88px;
+        }
+
+        .sidebar.collapsed:hover{
+            width: 270px;
+        }
+
+        /* Brand */
+        .brand{
+            display:flex;
+            align-items:center;
+            gap: 12px;
+            padding: 10px 10px;
+            border-radius: 18px;
+            margin-bottom: 14px;
+        }
+
+        .brand img{
+            width: 54px;
+            height: 54px;
+            border-radius: 18px;
+            object-fit: cover;
+            background: rgba(255,255,255,0.10);
+            padding: 8px;
+        }
+
+        .brand .title{
+            font-weight: 900;
+            font-size: 14px;
+            letter-spacing: .6px;
+            white-space:nowrap;
+        }
+
+        .brand .subtitle{
+            font-size: 12px;
+            color: #cbd5e1;
+            margin-top: 2px;
+            white-space:nowrap;
+            font-weight: 700;
+        }
+
+        /* Ocultar texto cuando está colapsado */
+        .sidebar.collapsed .brand .title,
+        .sidebar.collapsed .brand .subtitle{
+            opacity:0;
+            transform: translateX(-10px);
+            transition: .2s;
+        }
+
+        .sidebar.collapsed:hover .brand .title,
+        .sidebar.collapsed:hover .brand .subtitle{
+            opacity:1;
+            transform: translateX(0);
+        }
+
+        /* Profile */
+        .profile{
+            margin-top: 10px;
+            padding: 14px 12px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.06);
+            display:flex;
+            gap: 12px;
+            align-items:center;
+        }
+
+        .avatar{
+            width: 50px;
+            height: 50px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight: 900;
+            font-size: 18px;
+            flex-shrink:0;
+        }
+
+        .profile .name{
+            font-weight: 900;
+            font-size: 13px;
+            white-space:nowrap;
+        }
+
+        .profile .role{
+            font-size: 12px;
+            color:#cbd5e1;
+            font-weight: 800;
+            margin-top: 3px;
+            white-space:nowrap;
+        }
+
+        .sidebar.collapsed .profile .name,
+        .sidebar.collapsed .profile .role{
+            opacity:0;
+            transform: translateX(-10px);
+            transition: .2s;
+        }
+
+        .sidebar.collapsed:hover .profile .name,
+        .sidebar.collapsed:hover .profile .role{
+            opacity:1;
+            transform: translateX(0);
+        }
+
+        /* Nav */
+        .nav{
+            display:flex;
+            flex-direction:column;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .nav a{
+            display:flex;
+            align-items:center;
+            gap: 12px;
+            padding: 12px 12px;
+            border-radius: 18px;
+            text-decoration:none;
+            color: white;
+            font-weight: 800;
+            transition: .18s;
+            white-space:nowrap;
+        }
+
+        .nav a:hover{
+            background: rgba(255,255,255,0.10);
+        }
+
+        .nav a.active{
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.16);
+        }
+
+        .icon{
+            width: 44px;
+            height: 44px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.08);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-shrink:0;
+        }
+
+        .icon svg{
+            width: 22px;
+            height: 22px;
+            fill: white;
+            opacity: .92;
+        }
+
+        .sidebar.collapsed .nav span{
+            opacity:0;
+            transform: translateX(-10px);
+            transition: .2s;
+        }
+
+        .sidebar.collapsed:hover .nav span{
+            opacity:1;
+            transform: translateX(0);
+        }
+
+        /* Main */
+        .main{
+            flex:1;
+            padding: 24px;
+        }
+
+        /* Topbar */
+        .topbar{
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 16px 18px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            margin-bottom: 18px;
+        }
+
+        .topbar h1{
+            font-size: 18px;
+            margin:0;
+            font-weight: 900;
+        }
+
+        .logout{
+            background: #dc2626;
+            color:white;
+            border:none;
+            padding: 10px 14px;
+            border-radius: 14px;
+            cursor:pointer;
+            font-weight: 900;
+            text-decoration:none;
+        }
+
+        /* Messages */
+        .msg{
+            padding: 12px 14px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            font-weight: 800;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+        .msg-error{ background:#fee2e2; color:#991b1b; }
+        .msg-success{ background:#dcfce7; color:#166534; }
+
+        /* Content */
+        .content{
+            margin-top: 10px;
+        }
+
+        /* Grid KPI */
+        .grid{
+            display:grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .card{
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 18px;
+            position: relative;
+            overflow:hidden;
+        }
+
+        .kpi-title{
+            font-size: 13px;
+            color: var(--muted);
+            font-weight: 900;
+            margin:0;
+        }
+
+        .kpi-value{
+            font-size: 32px;
+            font-weight: 900;
+            margin: 8px 0 0 0;
+        }
+
+        .badge{
+            position:absolute;
+            right: 14px;
+            top: 14px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            color:white;
+            padding: 8px 12px;
+            border-radius: 16px;
+            font-weight: 900;
+            font-size: 12px;
+        }
+
+        .section{
+            margin-top: 18px;
+            display:grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 16px;
+        }
+
+        .chart-box{
+            min-height: 320px;
+        }
+
+        .mini-card{
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 18px;
+        }
+
+        .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-weight: 900;
+    text-decoration:none;
+    border:none;
+    cursor:pointer;
+    transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+}
+
+.btn:hover{
+    transform: translateY(-1px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.10);
+    opacity: .95;
+}
+
+/* ====== VARIANTES ====== */
+.btn-purple{
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    color: white !important;
+}
+
+.btn-blue{
+    background: #0f3a56;
+    color: white !important;
+}
+
+.btn-black{
+    background: #111827;
+    color: white !important;
+}
+
+/* BOTON CLARO: TEXTO OSCURO */
+.btn-light{
+    background: #f1f5f9;
+    color: #0f172a !important;
+    border: 1px solid #e2e8f0;
+
+}
+
+:root{
+    --muted:#7c7c7c;
+    --card:#ffffff;
+    --border:#e7e7e7;
+}
+
+/* Header */
+.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:16px;
+    margin-bottom:16px;
+}
+
+.page-title{
+    margin:0;
+    font-size:28px;
+    font-weight:900;
+}
+
+.page-subtitle{
+    margin-top:6px;
+    color:var(--muted);
+    font-weight:700;
+}
+
+/* Card */
+.card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:0;
+    box-shadow:0 10px 30px rgba(0,0,0,0.06);
+    overflow:hidden;
+}
+
+.card-header{
+    padding:14px 18px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.card-header h3{
+    margin:0;
+    font-weight:900;
+}
+
+/* Tabla pro */
+.table-responsive{
+    width:100%;
+    overflow-x:auto;
+}
+
+.table-pro{
+    width:100%;
+    border-collapse:collapse;
+    min-width:900px;
+}
+
+.table-pro th{
+    text-align:left;
+    padding:12px 14px;
+    font-weight:900;
+    background:#f7f7fb;
+    border-bottom:1px solid var(--border);
+    font-size:14px;
+}
+
+.table-pro td{
+    padding:12px 14px;
+    border-bottom:1px solid var(--border);
+    font-weight:700;
+}
+
+.table-pro tr:hover{
+    background:#fafaff;
+}
+
+/* Badges */
+.badge{
+    display:inline-block;
+    padding:6px 10px;
+    border-radius:999px;
+    font-weight:900;
+    background:#ececff;
+    color:#3b2bbf;
+    font-size:12px;
+}
+
+.badge-soft{
+    background:#eafff2;
+    color:#0f7b3c;
+}
+
+/* Botones pequeños */
+.btn-sm{
+    padding:7px 10px;
+    font-size:13px;
+    border-radius:10px;
+    font-weight:900;
+    text-decoration:none;
+    display:inline-block;
+    margin:2px;
+}
+
+.btn-blue{
+    background:#1f6feb;
+    color:#fff;
+    border:none;
+}
+
+.btn-danger{
+    background:#e11d48;
+    color:#fff;
+    border:none;
+}
+
+.btn-light:hover{
+    background: #e2e8f0;
+}
+
+        .btn-purple{ background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+        .btn-blue{ background: #0f3a56; }
+        .btn-yellow{ background: #856fb3; }
+        .btn-black{ background: #111827; }
+
+        /* Responsive */
+        @media(max-width: 980px){
+            .grid{ grid-template-columns: 1fr; }
+            .section{ grid-template-columns: 1fr; }
+            .sidebar{ position: fixed; left:0; z-index: 20; }
+            .main{ margin-left: 88px; }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar collapsed">
+
+        <div class="brand">
+            <img src="{% static 'img/logo.png' %}" alt="ADO">
+            <div>
+                <div class="title">OPERACIONES ADO</div>
+                <div class="subtitle">Panel de control</div>
+            </div>
+        </div>
+
+        {% if user.is_authenticated %}
+        <div class="profile">
+            <div class="avatar">
+                {{ user.username|slice:":1"|upper }}
+            </div>
+            <div>
+                <div class="name">{{ user.username }}</div>
+                <div class="role">{{ user.rol }}</div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <nav class="nav">
+
+            <!-- DASHBOARD SEGUN ROL -->
+            {% if user.is_authenticated %}
+                {% if user.is_superuser or user.rol == "admin" %}
+                    <a href="{% url 'dashboard_admin' %}">
+                        <div class="icon">
+                            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                        </div>
+                        <span>Dashboard</span>
+                    </a>
+                {% elif user.rol == "preceptor" %}
+                    <a href="{% url 'dashboard_preceptor' %}">
+                        <div class="icon">
+                            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                        </div>
+                        <span>Dashboard</span>
+                    </a>
+                {% elif user.rol == "comedor" %}
+                    <a href="{% url 'dashboard_comedor' %}">
+                        <div class="icon">
+                            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                        </div>
+                        <span>Dashboard</span>
+                    </a>
+                {% elif user.rol == "conductor" %}
+                    <a href="{% url 'dashboard_conductor' %}">
+                        <div class="icon">
+                            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                        </div>
+                        <span>Dashboard</span>
+                    </a>
+        
+                {% elif user.rol == "auditor" %}
+                    <a href="{% url 'dashboard_auditor' %}">
+                        <div class="icon">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                            </svg>
+                        </div>
+                        <span>Dashboard</span>
+                    </a>
+                {% endif %}
+                {% endif %}
+            
+
+
+            <!-- ADMIN -->
+            {% if user.is_superuser or user.rol == "admin" %}
+
+                <a href="{% url 'conductores_list' %}">
+                    <div class="icon">
+                        <svg viewBox="0 0 24 24"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3-3-3-3-3H7S4 3 4 6v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5S15.67 14 16.5 14s1.5.67 1.5 1.5S17.33 17 16.5 17zM6 11V6h12v5H6z"/></svg>
+                    </div>
+                    <span>Conductores</span>
+                </a>
+
+                <a href="{% url 'usuarios_list' %}">
+                    <div class="icon">
+                        <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zM8 11c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                    </div>
+                    <span>Usuarios</span>
+                </a>
+
+                <a href="/recargas/historial/">
+                    <div class="icon">
+                        <svg viewBox="0 0 24 24"><path d="M3 3h18v2H3V3zm0 4h18v6H3V7zm0 8h18v6H3v-6zm2 2v2h6v-2H5z"/></svg>
+                    </div>
+                    <span>Historial recargas</span>
+                </a>
+
+                <a href="/recargas/nueva/">
+                    <div class="icon">
+                        <svg viewBox="0 0 24 24"><path d="M19 13H13v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                    </div>
+                    <span>Nueva recarga</span>
+                </a>
+
+
+
+            {% endif %}
+
+
+            <!-- PRECEPTOR -->
+            {% if user.is_authenticated and user.rol == "preceptor" %}
+
+                <a href="/recargas/historial/">
+                    <div class="icon">
+                        <svg viewBox="0 0 24 24"><path d="M3 3h18v2H3V3zm0 4h18v6H3V7zm0 8h18v6H3v-6zm2 2v2h6v-2H5z"/></svg>
+                    </div>
+                    <span>Historial recargas</span>
+                </a>
+
+
+            {% endif %}
+
+
+            <!-- COMEDOR -->
+            {% if user.is_authenticated and user.rol == "comedor" %}
+
+                <a href="/validacion/">
+                    <div class="icon">
+                        <svg viewBox="0 0 24 24"><path d="M9 2H7c-1.1 0-2 .9-2 2v2h2V4h2V2zm8 0h-2v2h2v2h2V4c0-1.1-.9-2-2-2zM7 18H5v2c0 1.1.9 2 2 2h2v-2H7v-2zm12 0h-2v2h-2v2h2c1.1 0 2-.9 2-2v-2zM7 7h10v10H7V7zm2 2v6h6V9H9z"/></svg>
+                    </div>
+                    <span>Validación QR</span>
+                </a>
+
+            {% endif %}
+
+
+            <!-- CONDUCTOR -->
+            {% if user.is_authenticated and user.rol == "conductor" %}
+                <a href="{% url 'conductor_qr' %}">
+                    <div class="icon">
+                        <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 3h3v3h-3v-3zm0-3h6v2h-6v-2z"/></svg>
+                    </div>
+                    <span>Mi QR</span>
+                </a>
+            {% endif %}
+        
+            <!---AUDITOR-->
+
+            {% if user.is_authenticated and user.rol == "auditor" %}
+            <a href="{% url 'auditoria_reportes' %}">
+                <div class="icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M3 3h18v2H3V3zm0 4h18v6H3V7zm0 8h18v6H3v-6z"/>
+                    </svg>
+                </div>
+                <span>Reportes</span>
+            </a>
+            {% endif %}
+        </nav>
+
+    </aside>
+
+
+    <!-- Main -->
+    <main class="main">
+
+        <div class="topbar">
+            <h1>{% block page_title %}Sistema{% endblock %}</h1>
+
+            {% if user.is_authenticated %}
+                <a class="logout" href="{% url 'logout' %}">Salir</a>
+            {% endif %}
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="msg {% if message.tags == 'error' %}msg-error{% else %}msg-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+
+    </main>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Editar Conductor{% endblock %}
+
+{% block content %}
+
+<div class="card" style="padding:18px; max-width:900px;">
+
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+        <div>
+            <h2 style="margin:0; font-weight:900;">Editar Conductor</h2>
+            <p style="margin:6px 0 0 0; color:var(--muted); font-weight:700;">
+                Actualiza los datos del conductor.
+            </p>
+        </div>
+
+        <a href="{% url 'conductores_list' %}" class="btn btn-blue">Volver</a>
+    </div>
+
+    <hr style="margin:16px 0; border:0; border-top:1px solid #e2e8f0;">
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+            <div>
+                <label style="font-weight:900;">Clave</label>
+                {{ form.clave }}
+            </div>
+
+            <div>
+                <label style="font-weight:900;">Marca</label>
+                {{ form.marca }}
+            </div>
+
+            <div>
+                <label style="font-weight:900;">Nombre</label>
+                {{ form.nombre }}
+            </div>
+
+            <div>
+                <label style="font-weight:900;">Apellido paterno</label>
+                {{ form.apellido_paterno }}
+            </div>
+
+            <div>
+                <label style="font-weight:900;">Apellido materno</label>
+                {{ form.apellido_materno }}
+            </div>
+        </div>
+
+        <button class="btn btn-purple" style="margin-top:16px;">
+            Guardar cambios
+        </button>
+    </form>
+
+</div>
+
+<style>
+    input, select{
+        width:100%;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+        font-weight: 800;
+        outline:none;
+        margin-top:6px;
+    }
+</style>
+
+{% endblock %}

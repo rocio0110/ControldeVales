@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Comedor{% endblock %}
+{% block page_title %}Dashboard Comedor{% endblock %}
+
+{% block content %}
+
+<!-- ================= KPI ================= -->
+<div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:20px; margin-bottom:20px;">
+    <div class="card">
+        <div class="badge">QR</div>
+        <p class="kpi-title">Validaciones hoy</p>
+        <p class="kpi-value">{{ validaciones_hoy|default:"12" }}</p>
+    </div>
+
+    <div class="card">
+        <div class="badge">Sistema</div>
+        <p class="kpi-title">Escaneos</p>
+        <p class="kpi-value">{{ incidencias|default:"8" }}</p>
+    </div>
+
+    <div class="card">
+        <div class="badge">Conductores</div>
+        <p class="kpi-title">Saldo bajo</p>
+        <p class="kpi-value">{{ saldo_bajo|default:"3" }}</p>
+    </div>
+</div>
+
+<!-- ================= SECCION GRAFICA + ACCIONES ================= -->
+<div class="section" style="display:grid; grid-template-columns:1.5fr 1fr; gap:20px; margin-bottom:20px; align-items:start;">
+
+    <!-- Gráfica de Escaneos (más compacta) -->
+    <div class="card chart-box" style="padding:15px;">
+        <h3 style="margin:0; font-weight:900; text-align:center;">Escaneos de QR</h3>
+        <p style="margin:6px 0 12px 0; color:var(--muted); font-weight:800; text-align:center;">
+            Actividad semanal
+        </p>
+        <div style="max-width:300px; margin:0 auto;">
+            <canvas id="chartComedor"></canvas>
+        </div>
+    </div>
+
+    <!-- Mini Card de Acciones -->
+    <div class="mini-card" style="padding:15px;">
+        <h3 style="margin-top:0; font-weight:900;">Acciones</h3>
+        <div style="display:flex; flex-direction:column; gap:12px; margin-top:14px;">
+            <a class="btn btn-black" href="/validacion/">Validar QR</a>
+        </div>
+    </div>
+
+</div>
+
+<!-- ================= JS CHART ================= -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('chartComedor').getContext('2d');
+
+// Datos ficticios si no hay valores reales
+const correctas = {{ validaciones_hoy|default:"12" }};
+const rechazadas = {{ rechazadas|default:"3" }};
+
+new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Correctas','Rechazadas'],
+        datasets: [{
+            data: [correctas, rechazadas],
+            backgroundColor: [
+                'rgba(75, 192, 192, 0.7)',
+                'rgba(255, 99, 132, 0.7)'
+            ],
+            borderColor: [
+                'rgba(75, 192, 192, 1)',
+                'rgba(255, 99, 132, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { 
+            legend: { position: 'bottom', labels: { font: { weight: 'bold' } } }
+        }
+    }
+});
+</script>
+
+{% endblock %}

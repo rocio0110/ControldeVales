@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Conductor{% endblock %}
+{% block page_title %}Mi Panel{% endblock %}
+
+{% block content %}
+
+<!-- ================= KPI ================= -->
+<div class="grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:20px; margin-bottom:20px;">
+    <div class="card">
+        <div class="badge">Clave</div>
+        <p class="kpi-title">Tu clave</p>
+        <p class="kpi-value">{{ conductor.clave|default:"A123" }}</p>
+    </div>
+
+    <div class="card">
+        <div class="badge">Vales</div>
+        <p class="kpi-title">Vales disponibles</p>
+        <p class="kpi-value">{{ conductor.saldo|default:"10" }}</p>
+    </div>
+
+    <div class="card">
+        <div class="badge">Vales</div>
+        <p class="kpi-title">Consumidos hoy</p>
+        <p class="kpi-value">{{ total_consumidos|default:"3" }}</p>
+    </div>
+</div>
+
+<!-- ================= DETALLE VALORES ================= -->
+<div class="card" style="padding:15px; margin-bottom:20px;">
+    <h3 style="font-weight:900;">Vales consumidos hoy</h3>
+    {% for vale in vales_consumidos_hoy %}
+        <div style="padding:10px; background:#f1f5f9; margin-top:6px; border-radius:8px;">
+            {{ vale.lugar }} - {{ vale.fecha|time:"H:i" }}
+        </div>
+    {% empty %}
+        <p style="margin-top:10px;">Sin consumos hoy</p>
+    {% endfor %}
+</div>
+
+<!-- ================= GRAFICA SEMANAL ================= -->
+<div class="card chart-box" style="padding:15px;">
+    <h3 style="margin:0; font-weight:900; text-align:center;">Consumo de vales esta semana</h3>
+    <p style="margin:6px 0 12px 0; color:var(--muted); font-weight:800; text-align:center;">
+        Total de vales consumidos por día
+    </p>
+    <div style="max-width:500px; margin:0 auto;">
+        <canvas id="chartConductor"></canvas>
+    </div>
+</div>
+
+<!-- ================= JS CHART ================= -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('chartConductor').getContext('2d');
+
+// Datos ficticios de ejemplo
+const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+const valesConsumidos = [2, 1, 3, 2, 0, 1, 0];
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: diasSemana,
+        datasets: [{
+            label: 'Vales consumidos',
+            data: valesConsumidos,
+            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero:true, stepSize:1 } }
+    }
+});
+</script>
+
+{% endblock %}

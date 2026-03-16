@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Conductores{% endblock %}
+
+{% block content %}
+
+<!-- HEADER CARD -->
+<div class="card" style="padding:18px;">
+
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+        <div>
+            <h2 style="margin:0; font-weight:900;">
+                Conductores Registrados
+            </h2>
+            <p style="margin:6px 0 0 0; color: var(--muted); font-weight:700;">
+                Consulta y gestión de conductores activos en el sistema.
+            </p>
+        </div>
+
+        <a href="{% url 'conductores_nuevo' %}"
+           class="btn"
+           style="background:#6a0d7b; color:white; padding:10px 16px;">
+            + Nuevo conductor
+        </a>
+    </div>
+
+</div>
+
+
+<!-- BUSCADOR -->
+<div class="card" style="padding:18px; margin-top:16px;">
+
+    <form method="GET" style="margin-bottom:16px;">
+        <input type="text"
+               name="q"
+               placeholder="Buscar por nombre..."
+               value="{{ request.GET.q }}"
+               style="padding:8px; width:260px;">
+        <button class="btn btn-blue">
+            Buscar
+        </button>
+    </form>
+
+    {% if conductores %}
+    <div style="overflow:auto;">
+        <table style="width:100%; border-collapse:collapse; min-width:1000px;">
+            <thead>
+                <tr style="background:#0f3a56; color:white;">
+                    <th style="padding:14px;">Clave</th>
+                    <th style="padding:14px;">Nombre</th>
+                    <th style="padding:14px;">Marca</th>
+                    <th style="padding:14px;">Usuario</th>
+                    <th style="padding:14px;">Saldo</th>
+                    <th style="padding:14px;">Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for c in conductores %}
+                <tr style="border-bottom:1px solid #e2e8f0;">
+
+                    <td style="padding:14px; font-weight:900;">
+                        {{ c.clave }}
+                    </td>
+
+                    <td style="padding:14px; font-weight:800;">
+                        {{ c.nombre }} {{ c.apellido_paterno }} {{ c.apellido_materno }}
+                    </td>
+
+                    <!-- MARCA TIPO BADGE -->
+                    <td style="padding:14px;">
+                        <span style="
+                            padding:6px 10px;
+                            border-radius:999px;
+                            background:rgba(15,58,86,0.12);
+                            font-weight:800;
+                        ">
+                            {{ c.marca|default:"--" }}
+                        </span>
+                    </td>
+
+                    <td style="padding:14px;">
+                        {{ c.user.username }}
+                    </td>
+
+                    <td style="padding:14px; font-weight:900;">
+                        ${{ c.saldo }}
+                    </td>
+
+                    <td style="padding:14px;">
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+
+                            <a href="{% url 'conductor_detalle' c.clave %}"
+                               class="btn"
+                               style="background:#0f3a56; color:white; padding:8px 12px;">
+                                Ver
+                            </a>
+
+                            <a href="{% url 'conductor_editar' c.clave %}"
+                               class="btn"
+                               style="background:#6a0d7b; color:white; padding:8px 12px;">
+                                Editar
+                            </a>
+
+                            <a href="{% url 'conductor_eliminar' c.clave %}"
+                               class="btn"
+                               style="background:#dc2626; color:white; padding:8px 12px;"
+                               onclick="return confirm('¿Seguro que quieres eliminar este conductor?');">
+                                Eliminar
+                            </a>
+
+                        </div>
+                    </td>
+
+                </tr>
+
+                {% empty %}
+                <tr>
+                    <td colspan="6"
+                        style="padding:18px; text-align:center; color:var(--muted); font-weight:800;">
+                        No hay conductores registrados.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+        <p style="color:var(--muted); font-weight:800;">
+            No hay conductores registrados.
+        </p>
+    {% endif %}
+
+</div>
+
+{% endblock %}

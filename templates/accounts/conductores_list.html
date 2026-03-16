@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% block title %}Conductores{% endblock %}
+
+{% block content %}
+
+<div class="card" style="padding: 18px;">
+
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+        <div>
+            <h2 style="margin:0; font-weight:900;">Conductores</h2>
+            <p style="margin:6px 0 0 0; color: var(--muted); font-weight:700;">
+                Lista de conductores registrados en el sistema.
+            </p>
+        </div>
+
+        <a class="btn btn-purple" href="{% url 'conductores_nuevo' %}">
+            + Nuevo conductor
+        </a>
+    </div>
+
+</div>
+
+<div class="card" style="padding: 18px; margin-top: 16px;">
+
+    <div style="overflow:auto;">
+        <table style="width:100%; border-collapse: collapse; min-width: 980px;">
+            <thead>
+                <tr style="background:#0f3a56; color:white;">
+                    <th style="padding:14px; text-align:left;">Clave</th>
+                    <th style="padding:14px; text-align:left;">Nombre</th>
+                    <th style="padding:14px; text-align:left;">Marca</th>
+                    <th style="padding:14px; text-align:left;">Username</th>
+                    <th style="padding:14px; text-align:left;">Saldo</th>
+                    <th style="padding:14px; text-align:left;">Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for c in conductores %}
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding:14px; font-weight:900;">
+                        {{ c.clave }}
+                    </td>
+
+                    <td style="padding:14px; font-weight:800;">
+                        {{ c.nombre }} {{ c.apellido_paterno }} {{ c.apellido_materno }}
+                    </td>
+
+                    <td style="padding:14px;">
+                        <span style="
+                            display:inline-block;
+                            padding:6px 10px;
+                            border-radius: 999px;
+                            font-weight:900;
+                            background: rgba(106, 13, 123, 0.12);
+                            color: #6a0d7b;
+                        ">
+                            {{ c.marca }}
+                        </span>
+                    </td>
+
+                    <td style="padding:14px; font-weight:800; color:#0f172a;">
+                        {{ c.user.username }}
+                    </td>
+
+                    <td style="padding:14px; font-weight:900;">
+                        {{ c.saldo }}
+                    </td>
+
+                    <td style="padding:14px;">
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+
+                            <a href="{% url 'conductor_detalle' c.id %}"
+                               class="btn"
+                               style="background:#0f3a56; color:white; padding:10px 12px;">
+                                Ver
+                            </a>
+
+                            <a href="{% url 'conductor_editar' c.id %}"
+                               class="btn"
+                               style="background:#6a0d7b; color:white; padding:10px 12px;">
+                                Editar
+                            </a>
+
+                            <!--  Botón que abre el modal -->
+                            <button
+                                type="button"
+                                class="btn"
+                                style="background:#dc2626; color:white; padding:10px 12px;"
+                                onclick="openDeleteModal('{{ c.id }}', '{{ c.clave }}', '{{ c.nombre }} {{ c.apellido_paterno }} {{ c.apellido_materno }}')"
+                            >
+                                Eliminar
+                            </button>
+
+                        </div>
+                    </td>
+                </tr>
+
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="padding:18px; text-align:center; color: var(--muted); font-weight:800;">
+                        No hay conductores registrados.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+
+
+<!--  MODAL -->
+<div id="deleteModal" class="modal-bg" style="display:none;">
+    <div class="modal-card">
+
+        <h3 style="margin:0; font-weight:900; color:#991b1b;">
+             Confirmar eliminación
+        </h3>
+
+        <p style="margin:10px 0 0 0; font-weight:800;">
+            ¿Seguro que deseas eliminar al conductor?
+        </p>
+
+        <div class="mini-card" style="margin-top:14px;">
+            <div style="font-weight:900;" id="modalConductorClave"></div>
+            <div style="margin-top:6px; color:var(--muted); font-weight:800;" id="modalConductorNombre"></div>
+        </div>
+
+        <p style="margin-top:14px; color:#991b1b; font-weight:900;">
+            Esta acción NO se puede deshacer.
+        </p>
+
+        <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;">
+            <form id="deleteForm" method="POST" style="margin:0;">
+                {% csrf_token %}
+                <button class="btn" style="background:#dc2626;">
+                    Sí, eliminar
+                </button>
+            </form>
+
+            <button class="btn btn-blue" type="button" onclick="closeDeleteModal()">
+                Cancelar
+            </button>
+        </div>
+
+    </div>
+</div>
+
+
+<!--ESTILOS DEL MODAL -->
+<style>
+    .modal-bg{
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.55);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        z-index: 9999;
+        padding: 16px;
+    }
+
+    .modal-card{
+        width: 100%;
+        max-width: 560px;
+        background: white;
+        border-radius: 18px;
+        padding: 18px;
+        box-shadow: 0 18px 40px rgba(0,0,0,0.22);
+        animation: pop .18s ease;
+    }
+
+    @keyframes pop{
+        from{ transform: scale(0.96); opacity: 0; }
+        to{ transform: scale(1); opacity: 1; }
+    }
+</style>
+
+
+<!-- JS -->
+<script>
+    function openDeleteModal(id, clave, nombre){
+        const modal = document.getElementById("deleteModal");
+        const form = document.getElementById("deleteForm");
+
+        document.getElementById("modalConductorClave").innerText = "Clave: " + clave;
+        document.getElementById("modalConductorNombre").innerText = "Nombre: " + nombre;
+
+        // l action del form
+        form.action = "/conductores/" + id + "/eliminar/";
+
+        modal.style.display = "flex";
+    }
+
+    function closeDeleteModal(){
+        document.getElementById("deleteModal").style.display = "none";
+    }
+
+    // cerrar si das click afuera
+    document.getElementById("deleteModal").addEventListener("click", function(e){
+        if(e.target === this){
+            closeDeleteModal();
+        }
+    });
+
+    // cerrar con ESC
+    document.addEventListener("keydown", function(e){
+        if(e.key === "Escape"){
+            closeDeleteModal();
+        }
+    });
+</script>
+
+{% endblock %}

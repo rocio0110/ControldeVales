@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Usuarios{% endblock %}
+
+{% block content %}
+
+<div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+    <h2 style="margin:0; font-weight:900;">Usuarios del sistema</h2>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="btn btn-purple" href="{% url 'usuarios_nuevo' %}">+ Nuevo usuario interno</a>
+        <a class="btn btn-blue" href="{% url 'conductores_nuevo' %}">+ Nuevo conductor</a>
+    </div>
+</div>
+
+<div class="card" style="margin-top:18px;">
+
+    <!-- BUSCADOR -->
+    <form method="GET" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:14px;">
+        <input
+            type="text"
+            name="q"
+            value="{{ q }}"
+            placeholder="Buscar por usuario, email o rol..."
+            style="
+                flex:1;
+                min-width:240px;
+                padding:12px 14px;
+                border-radius:14px;
+                border:1px solid #e2e8f0;
+                outline:none;
+                font-weight:800;
+            "
+        >
+
+        <button class="btn btn-purple" type="submit">
+            Buscar
+        </button>
+
+        {% if q %}
+            <a href="{% url 'usuarios_list' %}" class="btn btn-black">
+                Limpiar
+            </a>
+        {% endif %}
+    </form>
+
+    <!-- INFO -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:12px; flex-wrap:wrap;">
+        <div>
+            <div style="font-weight:900; font-size:15px;">Listado de usuarios</div>
+            <div style="color:var(--muted); font-weight:800; font-size:13px;">
+                {% if q %}
+                    Resultados para: <span style="color:#0f172a;">"{{ q }}"</span> — Total: {{ usuarios|length }}
+                {% else %}
+                    Total: {{ usuarios|length }}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLA -->
+    <div style="overflow:auto; border-radius: 16px;">
+        <table style="width:100%; border-collapse:collapse; min-width:700px;">
+            <thead>
+                <tr style="background:#0f172a; color:white;">
+                    <th style="text-align:left; padding:14px 14px;">Usuario</th>
+                    <th style="text-align:left; padding:14px 14px;">Email</th>
+                    <th style="text-align:left; padding:14px 14px;">Rol</th>
+                    <th style="text-align:center; padding:14px 14px;">Superuser</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for u in usuarios %}
+                <tr style="border-bottom:1px solid #e2e8f0;">
+                    <td style="padding:14px 14px; font-weight:900;">
+                        {{ u.username }}
+                    </td>
+
+                    <td style="padding:14px 14px; color:#334155; font-weight:800;">
+                        {% if u.email %}
+                            {{ u.email }}
+                        {% else %}
+                            <span style="color:#94a3b8;">---</span>
+                        {% endif %}
+                    </td>
+
+                    <td style="padding:14px 14px;">
+
+                        {% if u.rol == "admin" %}
+                            <span style="padding:6px 10px; border-radius:999px; background:#fee2e2; color:#991b1b; font-weight:900; font-size:12px;">
+                                Administrador
+                            </span>
+
+                        {% elif u.rol == "supervisor" %}
+                            <span style="padding:6px 10px; border-radius:999px; background:#dbeafe; color:#1d4ed8; font-weight:900; font-size:12px;">
+                                Preceptor
+                            </span>
+
+                        {% elif u.rol == "comedor" %}
+                            <span style="padding:6px 10px; border-radius:999px; background:#dcfce7; color:#166534; font-weight:900; font-size:12px;">
+                                Comedor
+                            </span>
+
+                        {% elif u.rol == "auditor" %}
+                            <span style="padding:6px 10px; border-radius:999px; background:#fef3c7; color:#92400e; font-weight:900; font-size:12px;">
+                                Auditor
+                            </span>
+
+                        {% else %}
+                            <span style="padding:6px 10px; border-radius:999px; background:#f1f5f9; color:#0f172a; font-weight:900; font-size:12px;">
+                                Conductor
+                            </span>
+                        {% endif %}
+
+                    </td>
+
+                    <td style="padding:14px 14px; text-align:center; font-weight:900;">
+                        {% if u.is_superuser %}
+                            <span style="color:#16a34a;"> Sí</span>
+                        {% else %}
+                            <span style="color:#dc2626;"> No</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="padding:18px; text-align:center; color:var(--muted); font-weight:900;">
+                        No hay usuarios registrados.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    tbody tr:hover{
+        background: #f8fafc;
+        transition: .12s;
+    }
+</style>
+
+{% endblock %}
