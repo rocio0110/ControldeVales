@@ -7,7 +7,7 @@ def auditoria_reportes(request):
     fecha_fin = request.GET.get("fecha_fin")
 
     hoy = timezone.now()
-
+    
     # Filtro automático por periodo
     if not fecha_inicio and not fecha_fin:
         if periodo == "semanal":
